@@ -2,57 +2,75 @@ import inspect
 from functools import wraps
 
 
-def support_switch(function):
-    # получаем массив строк исходного кода и собираем новый исходник
-    source_code = inspect.getsourcelines(function)[0]
-    parameter = None
-    new_source_code = ""
+def switch_loop(line, source_code):
+    parameter = line[line.index("switch") + 7: line.index(":")]
+    code = ""
+    insert_from = line.index("switch")
+    code += " " * insert_from + "while True:\n"
+    indent = insert_from + 4
+    while True:
+        try:
+            line = source_code.pop(0)
+            if line.startswith(" " * indent) and "switch" in line:
+                code += switch_loop(line, source_code)
+            elif line.startswith(" " * indent):
+                code += line.replace("case", f"if ({parameter}) ==") + "\n"
+            else:
+                code += " " * indent + "break\n"
+                source_code.insert(0, line)
+                indent -= 4
+                break
+        except IndexError:
+            break
+    return code
+
+
+def parser(string: str):
+    source_code = string.split("\n")
+    source_code = list(filter(None, source_code))
+
+    new_string = ""
     while source_code:
         line = source_code.pop(0)
-        if "@" in line or "\"\"\"" in line:
-            continue
-        if "switch " in line:
-            parameter = line[line.index("switch ") + 7: line.index(":\n")]
-            continue
-        if "return" in line:
-            new_source_code += line.replace("    return", "return")
-            continue
-        new_source_code += line
+        if "switch" in line:
+            code = switch_loop(line, source_code)
+            new_string += code
+        else:
+            new_string += line + "\n"
+    return new_string
 
-    new_source_code = new_source_code.replace("    case", f"if {parameter} ==")
+
+def support_switch(function):
+    code_from_docstring = parser(function.__doc__)
+    source_code = inspect.getsource(function)
+
+    def_begin = source_code.index(f"def {function.__name__}")
+    doc_begin = source_code.index(function.__doc__)
+    source_code = source_code[def_begin - 1: doc_begin]
+    def_end = source_code.rfind(":") + 1
+    function_def = source_code[:def_end]
+
+    new_source_code = function_def + "\n" + code_from_docstring
     new_source_code = new_source_code.replace(f"def {function.__name__}", "def new_function")
 
-    exec(new_source_code)
+    __builtins__["exec"](new_source_code)
     new_func = locals()["new_function"]
 
     return wraps(function)(new_func)
 
 
-def exec_switch(string: str):
-    """
-    SWITCH-CASE in EXEC()
-    NOT FUNCTION !
-    """
-    try:
-        string.index("switch ")
-    except ValueError:
-        exec(string)
+def exec(string: str, globals_arg=None, locals_arg=None):
+    new_string = parser(string)
 
-    source_code = string.split("\n")
-    new_string = "while True:\n"
-    while source_code:
-        line = source_code.pop(0) + "\n"
-        if not line[0] == " ":
-            if line != "\n":
-                if "switch " not in line:
-                    new_string += f"    break\n"
-                else:  # тогда считываем параметр в switch строке
-                    parameter = string[string.index("switch ") + 7: string.index(":\n")]
-                    continue
-            else:  # тогда выкидываем эту строчку (она состоит из одного \n)
-                continue
-        if "case" in line:
-            new_string += line.replace("case", f"if {parameter} ==")
-            continue
-        new_string += line
-    return new_string
+    globals_ = inspect.stack()[1][0].f_globals
+    locals_ = inspect.stack()[1][0].f_locals
+
+    if globals_arg is None and locals_arg is not None:
+        raise ValueError
+    if globals_arg is None:
+        globals_arg = globals_
+    if locals_arg is None:
+        locals_arg = locals_
+
+    __builtins__["exec"](new_string, globals_arg, locals_arg)
+

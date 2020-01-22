@@ -1,5 +1,5 @@
 from pyswitch import support_switch
-from pyswitch import exec_switch as exec
+from pyswitch import exec
 
 
 @support_switch
@@ -22,10 +22,10 @@ print(my_function_with_switch.__doc__)
 exec("""print("hello")
 print(2 + 2)""")
 
-a, b, c = 2, 4, 5
+a, b, c = 2, 4, 4
 d = None
 
-string = """
+exec("""
 switch a*a:
     case b:
         print("Foo")
@@ -35,7 +35,6 @@ switch a*a:
         print("Bar")
         d = 2
         break
-
 assert d == 1
-"""
-exec(string)
+""")
+assert d == 1
