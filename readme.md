@@ -26,7 +26,7 @@ For more detailed information see **example of usage**.
 Example of usage
 ------------
 
-##### exec
+#### exec
 ```python
 a, b, c = 2, 4, 5
 d = None
@@ -51,7 +51,7 @@ assert d == 1
 Foo
 ```
 
-##### @support_switch
+#### @support_switch
 ```python
 @support_switch
 def my_function_with_switch(a: int, b: int, c: int):
