@@ -1,3 +1,7 @@
+"""
+This is a quick example of using pyswitch module
+"""
+
 from pyswitch import support_switch
 from pyswitch import exec
 
@@ -5,22 +9,25 @@ from pyswitch import exec
 @support_switch
 def my_function_with_switch(a: int, b: int, c: int):
     """
+    print("hello")
     switch a:
         case b:
             return True
         case c:
             return False
     """
-    print("hello")
 
 
 assert my_function_with_switch(2 * 2, 4, 5)
 print(my_function_with_switch(2 * 2, 4, 5))
 print(my_function_with_switch)
 print(my_function_with_switch.__doc__)
+print(my_function_with_switch.__name__)
 
-exec("""print("hello")
-print(2 + 2)""")
+exec("""
+print("hello")
+print(2 + 2)
+""")
 
 a, b, c = 2, 4, 4
 d = None
