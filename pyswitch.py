@@ -27,6 +27,7 @@ def switch_loop(line: str, source_code: list):
                 indent -= 4
                 break
         except IndexError:
+            code += " " * indent + "break\n"
             break
     return code
 
@@ -40,7 +41,7 @@ def parser(string: str):
     source_code = string.split("\n")
     source_code = list(filter(None, source_code))
 
-    new_string = ""
+    new_string = "\n"
     while source_code:
         line = source_code.pop(0)
         if "switch" in line:
