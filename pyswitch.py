@@ -45,8 +45,11 @@ def parser(string: str):
     while source_code:
         line = source_code.pop(0)
         if "switch" in line:
-            code = switch_loop(line, source_code)
-            new_string += code
+            try:
+                code = switch_loop(line, source_code)
+                new_string += code
+            except ValueError:
+                print("So far, I can not process your code correctly... Sorry :(")
         else:
             new_string += line + "\n"
     return new_string
@@ -58,16 +61,19 @@ def support_switch(function):
     :param function: function to be decorated
     :return: decorated function with modified source code from docstring
     """
-    code_from_docstring = parser(function.__doc__)
-    source_code = inspect.getsource(function)
+    source_code_lines = inspect.getsourcelines(function)[0]
+    indent = source_code_lines[0].index("@")
 
-    def_begin = source_code.index(f"def {function.__name__}")
-    doc_begin = source_code.index(function.__doc__)
-    source_code = source_code[def_begin - 1: doc_begin]
-    def_end = source_code.rfind(":") + 1
-    function_def = source_code[:def_end]
+    source_code = ""
+    for line in source_code_lines:
+        if line.startswith(f"{' ' * indent}def {function.__name__}"):
+            function_def = line[indent:]
+        elif not line.startswith(" " * indent + "@") and not line.startswith(" " * (indent + 4) + "\"\"\""):
+            source_code += line[indent:]
 
-    new_source_code = function_def + "\n" + code_from_docstring
+    parsed_source_code = parser(source_code)
+
+    new_source_code = function_def + parsed_source_code
     new_source_code = new_source_code.replace(f"def {function.__name__}", "def new_function")
 
     __builtins__["exec"](new_source_code)
