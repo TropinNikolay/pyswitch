@@ -89,19 +89,19 @@ class ParserTest(unittest.TestCase):
 """
         self.unit1_answer = """
         while True:
-            if (x) == 1:
+            if (x) == (1):
                 print(1)
                 break
-            if (x) == 2:
+            if (x) == (2):
                 print(2)
                 break
-            if (x) == 3:
+            if (x) == (3):
                 while True:
-                    if (y) == a:
+                    if (y) == (a):
                         print(a)
-                    if (y) == b:
+                    if (y) == (b):
                         while True:
-                            if (z) == c:
+                            if (z) == (c):
                                 print(c)
                                 break
                             break
@@ -112,11 +112,11 @@ class ParserTest(unittest.TestCase):
 """
         self.unit3_answer = """
         while True:
-            if (x) == 1:
+            if (x) == (1):
                 while True:
                     while True:
                         while True:
-                            if (t) == 2:
+                            if (t) == (2):
                                 break
                             break
                         break
@@ -126,24 +126,24 @@ class ParserTest(unittest.TestCase):
 """
         self.unit4_answer = """
         while True:
-            if (x) == 1:
+            if (x) == (1):
                 print(1)
                 break
             break
         while True:
-            if (x) == 1:
+            if (x) == (1):
                 print(1)
                 break
             break
         
         while True:
-            if (x) == 1:
+            if (x) == (1):
                 print(1)
                 break
                 
             break
         while True:
-            if (x) == 1:
+            if (x) == (1):
                 print(1)
                 break
             break
@@ -155,7 +155,7 @@ class ParserTest(unittest.TestCase):
             print("1")
             break
         while True:
-            if (x) == 1:
+            if (x) == (1):
                 print("Goodbye world!")
                 break
             break

@@ -9,7 +9,7 @@ def switch_loop(line: str, source_code: list):
     :param source_code: lines of source code (either from exec statement or function docstring)
     :return: str, modified switch-case part of source code (in terms of if-else statement)
     """
-    parameter = line[line.index("switch") + 7: line.index(":")]
+    left_parameter = line[line.index("switch") + 7: line.index(":")]
     code = ""
     insert_from = line.index("switch")
     code += " " * insert_from + "while True:\n"
@@ -20,7 +20,11 @@ def switch_loop(line: str, source_code: list):
             if line.startswith(" " * indent) and "switch" in line:
                 code += switch_loop(line, source_code)
             elif line.startswith(" " * indent):
-                code += line.replace("case", f"if ({parameter}) ==") + "\n"
+                try:
+                    right_parameter = line[line.index("case") + 5: line.index(":")]
+                    code += line.replace(f"case {right_parameter}", f"if ({left_parameter}) == ({right_parameter})") + "\n"
+                except ValueError:
+                    code += line + "\n"
             else:
                 code += " " * indent + "break\n"
                 source_code.insert(0, line)
